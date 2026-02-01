@@ -53,21 +53,12 @@ exclude = [
 [tool.black]
 line-length = 119
 target-version = ['py314']
-exclude = '''
-(
-  /(
-      \.eggs
-    | \.git
-    | \.hg
-    | \.mypy_cache
-    | __pycache__
-    | \.tox
-    | \.venv
-    | \env
-    | dist
-  )/
-  | foo.py
-)
+extend-exclude = '''
+\\.git
+| \\.venv
+| venv
+| env
+| __pycache__
 '''
 
 [tool.isort]
