@@ -1,16 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import Any, Optional
-
-from requests import Response
 
 
 class AbstractAPI(ABC):
     """Абстрактный класс для работы с API"""
-
-    @abstractmethod
-    def _connect(self, end: str, params: Optional[dict[Any, Any]] = None) -> Response:
-        """Абстрактный метод для подключения к API"""
-        ...
 
     @abstractmethod
     def get_vacancies(self, query: str) -> list[dict]:
