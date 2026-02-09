@@ -67,8 +67,7 @@ def create_tables(db_name: str, params: dict) -> None:
                     company_id INT,
                     city VARCHAR(100),
                     name VARCHAR(255) NOT NULL,
-                    salary_min INT,
-                    salary_max INT,
+                    salary FLOAT,
                     url TEXT NOT NULL,
 
                     FOREIGN KEY(company_id) REFERENCES companies(company_id)
@@ -81,7 +80,7 @@ def create_tables(db_name: str, params: dict) -> None:
 
 
 def clear_description(string: str) -> str:
-    """Полная очистка: теги + сущности + нормализация пробелов"""
+    """Удаление спецсимволов из строки"""
     if not string:
         return ""
     string = re.sub(r"<.*?>", "", string)
@@ -128,17 +127,24 @@ def save_data_to_database(data: list[dict[str, Any]], database_name: str, params
                     vacancy_city = vacancy.get("area", {}).get("name", "Не указан")
                     vacancy_url = vacancy.get("alternate_url", "")
 
-                    salary = vacancy.get("salary", 0)
-                    vacancy_min = salary.get("from") if salary and salary.get("from") is not None else 0
-                    vacancy_max = salary.get("to") if salary and salary.get("to") is not None else 0
+                    salary = vacancy.get("salary")
+                    vacancy_salary = None
+
+                    if salary:
+                        from_salary = salary.get("from")
+                        to_salary = salary.get("to")
+                        if from_salary and from_salary > 0:
+                            vacancy_salary = from_salary
+                        elif to_salary and to_salary > 0:
+                            vacancy_salary = to_salary
 
                     cur.execute(
                         """
-                        INSERT INTO vacancies (hh_vacancy_id, company_id, city, name, salary_min, salary_max, url)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                        INSERT INTO vacancies (hh_vacancy_id, company_id, city, name, salary, url)
+                        VALUES (%s, %s, %s, %s, %s, %s)
                         ON CONFLICT (hh_vacancy_id) DO NOTHING
                         """,
-                        (vacancy_id, company_id, vacancy_city, vacancy_name, vacancy_min, vacancy_max, vacancy_url),
+                        (vacancy_id, company_id, vacancy_city, vacancy_name, vacancy_salary, vacancy_url),
                     )
     except Exception as e:
         print(f"Произошла ошибка при заполнении таблиц: {e}")

@@ -2,11 +2,12 @@ import os
 
 from dotenv import load_dotenv
 
-from src.project3_job_search_with_db_connection.utils import (
-    get_company_vacancy,
+from src.project3_job_search_with_db_connection.db_manager import DBManager
+from src.project3_job_search_with_db_connection.db_utils import (
     create_database,
-    save_data_to_database,
     create_tables,
+    get_company_vacancy,
+    save_data_to_database,
 )
 
 load_dotenv()
@@ -38,6 +39,13 @@ def main() -> None:
     create_database(db_name, params)
     create_tables(db_name, params)
     save_data_to_database(data, db_name, params)
+
+    db = DBManager(db_name, params)
+    print(db.get_companies_and_vacancies_count())
+    print(db.get_all_vacancies())
+    print(db.get_avg_salary())
+    print(db.get_vacancies_with_higher_salary())
+    print(db.get_vacancies_with_keyword(["python", "менедж"]))
 
 
 if __name__ == "__main__":
