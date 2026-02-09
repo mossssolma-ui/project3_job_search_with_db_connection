@@ -1,9 +1,22 @@
+from abc import ABC, abstractmethod
 from typing import Any, Optional
 
 import requests
 from requests import Response
 
-from src.project3_job_search_with_db_connection.base_api import AbstractAPI
+
+class AbstractAPI(ABC):
+    """Абстрактный класс для работы с API"""
+
+    @abstractmethod
+    def get_employer_vacancies(self, employer_id: str) -> list[dict]:
+        """Абстрактный метод для получения вакансий работодателя"""
+        ...
+
+    @abstractmethod
+    def get_employer_info(self, employer_id: str) -> dict:
+        """Абстрактный метод для получения информации о работодателе"""
+        ...
 
 
 class HeadHunterAPI(AbstractAPI):
@@ -25,12 +38,6 @@ class HeadHunterAPI(AbstractAPI):
         response = requests.get(url, headers=self._headers, params=params_init)
         response.raise_for_status()
         return response
-
-    def get_vacancies(self, query: str) -> list[dict]:
-        """Метод получения вакансий по запросу"""
-        params = {"text": query}
-        response = self._connect("vacancies", params)
-        return response.json().get("items", [])  # type: ignore
 
     def get_employer_vacancies(self, employer_id: str) -> list[dict]:
         """Метод получения вакансий конкретного работодателя"""
