@@ -8,21 +8,15 @@ class DBManager:
         """Инициализация подключения к БД"""
         self.params = params.copy()
         self.params["database"] = db_name
-        self._conn = None
+        self._conn = psycopg2.connect(**self.params)
 
-    def connect(self) -> None:
-        """Подключение к БД"""
-        if not self._conn or self._conn.closed:
-            self._conn = psycopg2.connect(**self.params)
-
-    def disconnect(self) -> None:
-        """Отключение БД"""
+    def __del__(self) -> None:
+        """Закрывает соединение"""
         if self._conn and not self._conn.closed:
             self._conn.close()
 
     def run_query(self, query: str, params: tuple = None) -> list:  # type: ignore
         """Выполнение запроса"""
-        self.connect()
         try:
             with self._conn.cursor() as cur:  # type: ignore
                 cur.execute(query, params)
@@ -30,8 +24,7 @@ class DBManager:
                 return result  # type: ignore
         except Exception as e:
             print(f"Ошибка при выполнении запроса {e}")
-        finally:
-            self.disconnect()
+            return []
 
     def get_companies_and_vacancies_count(self) -> list[tuple]:
         """
@@ -83,6 +76,7 @@ class DBManager:
                         FROM vacancies
                         WHERE salary IS NOT NULL
                         )
+                    ORDER BY salary DESC;
                 """
         return self.run_query(query)
 
@@ -98,7 +92,7 @@ class DBManager:
         params = [f"%{word}%" for word in keyword]
 
         query = f"""
-                SELECT *
+                SELECT city, name, salary, url
                 FROM vacancies
                 WHERE {conditions}
                 ORDER BY name;

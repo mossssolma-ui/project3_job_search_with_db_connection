@@ -53,7 +53,6 @@ def create_tables(db_name: str, params: dict) -> None:
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS companies(
                     company_id SERIAL PRIMARY KEY,
-                    hh_id int UNIQUE,
                     name VARCHAR(255) NOT NULL,
                     city VARCHAR(100),
                     description TEXT,
@@ -63,7 +62,6 @@ def create_tables(db_name: str, params: dict) -> None:
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS vacancies(
                     vacancy_id SERIAL PRIMARY KEY,
-                    hh_vacancy_id INT UNIQUE,
                     company_id INT,
                     city VARCHAR(100),
                     name VARCHAR(255) NOT NULL,
@@ -75,6 +73,23 @@ def create_tables(db_name: str, params: dict) -> None:
             """)
     except Exception as e:
         print(f"Произошла ошибка при создании таблиц: {e}")
+    finally:
+        conn.close()
+
+
+def truncate_tables(db_name: str, params: dict) -> None:
+    """Очистка таблиц companies и vacancies перед загрузкой"""
+    params = params.copy()
+    params["database"] = db_name
+
+    conn = psycopg2.connect(**params)
+    conn.autocommit = True
+    try:
+        with conn.cursor() as cur:
+            cur.execute("TRUNCATE TABLE vacancies RESTART IDENTITY CASCADE;")
+            cur.execute("TRUNCATE TABLE companies RESTART IDENTITY CASCADE;")
+    except Exception as e:
+        print(f"Произошла ошибка при очистке таблиц: {e}")
     finally:
         conn.close()
 
@@ -100,7 +115,6 @@ def save_data_to_database(data: list[dict[str, Any]], database_name: str, params
         with conn.cursor() as cur:
             for company in data:
                 company_info = company["company"]
-                company_hh_id = company_info["id"]
                 company_name = company_info.get("name", "Не указано")
                 company_city = company_info.get("area", {}).get("name", "Не указан")
                 company_description = clear_description(company_info.get("description", ""))
@@ -108,21 +122,15 @@ def save_data_to_database(data: list[dict[str, Any]], database_name: str, params
 
                 cur.execute(
                     """
-                    INSERT INTO companies (hh_id, name, city, description, url)
-                    VALUES (%s, %s, %s, %s, %s)
-                    ON CONFLICT (hh_id) DO UPDATE SET
-                        name = EXCLUDED.name,
-                        city = EXCLUDED.city,
-                        description = EXCLUDED.description,
-                        url = EXCLUDED.url
+                    INSERT INTO companies (name, city, description, url)
+                    VALUES (%s, %s, %s, %s)
                     RETURNING company_id
                     """,
-                    (company_hh_id, company_name, company_city, company_description, company_url),
+                    (company_name, company_city, company_description, company_url),
                 )
                 company_id = cur.fetchone()[0]
                 vacancy_data = company["vacancy"]
                 for vacancy in vacancy_data:
-                    vacancy_id = vacancy["id"]
                     vacancy_name = vacancy.get("name", "Без названия")
                     vacancy_city = vacancy.get("area", {}).get("name", "Не указан")
                     vacancy_url = vacancy.get("alternate_url", "")
@@ -140,11 +148,10 @@ def save_data_to_database(data: list[dict[str, Any]], database_name: str, params
 
                     cur.execute(
                         """
-                        INSERT INTO vacancies (hh_vacancy_id, company_id, city, name, salary, url)
-                        VALUES (%s, %s, %s, %s, %s, %s)
-                        ON CONFLICT (hh_vacancy_id) DO NOTHING
+                        INSERT INTO vacancies (company_id, city, name, salary, url)
+                        VALUES (%s, %s, %s, %s, %s)
                         """,
-                        (vacancy_id, company_id, vacancy_city, vacancy_name, vacancy_salary, vacancy_url),
+                        (company_id, vacancy_city, vacancy_name, vacancy_salary, vacancy_url),
                     )
     except Exception as e:
         print(f"Произошла ошибка при заполнении таблиц: {e}")
