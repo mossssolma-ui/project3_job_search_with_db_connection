@@ -17,6 +17,7 @@
 - **PostgreSQL** — хранение данных
 - **psycopg2** — работа с БД
 - **requests** — запросы к API hh.ru
+- **tabulate** — отображение данных в ввиде таблицы
 - **python-dotenv** — управление переменными окружения
 
 ## Установка и запуск
@@ -74,6 +75,11 @@ project3_job_search_with_db_connection/
 ```
 Введите пункт меню: 5
 Введите ключевые слова через пробел: python junior
-Москва: Junior Python Developer: 120000.0: https://hh.ru/vacancy/12345678
-Санкт-Петербург: Python-разработчик (junior): Зарплата не указана: https://hh.ru/vacancy/87654321
+| city            | name                                                                 | salary     | url                             |
+|-----------------|----------------------------------------------------------------------|------------|---------------------------------|
+| Москва          | Expert IT Support Junior System Administrator                        | Не указана | https://hh.ru/vacancy/130297571 |
+| Санкт-Петербург | Junior HR BP - Специалист по персоналу (DS)                          | Не указана | https://hh.ru/vacancy/130320238 |
+| Москва          | Senior SDET Python (VM)                                              | Не указана | https://hh.ru/vacancy/130204934 |
+| Москва          | Стажёр - инженер по тестированию Python, Склад                       | Не указана | https://hh.ru/vacancy/130221299 |
+| Санкт-Петербург | Старший Python-разработчик в команду Кино/ТВ (Django Rest Framework) | Не указана | https://hh.ru/vacancy/130388278 |
 ```

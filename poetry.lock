@@ -657,6 +657,18 @@ files = [
 urllib3 = ">=2"
 
 [[package]]
+name = "types-tabulate"
+version = "0.9.0.20241207"
+description = "Typing stubs for tabulate"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "types_tabulate-0.9.0.20241207-py3-none-any.whl", hash = "sha256:b8dad1343c2a8ba5861c5441370c3e35908edd234ff036d4298708a1d4cf8a85"},
+    {file = "types_tabulate-0.9.0.20241207.tar.gz", hash = "sha256:ac1ac174750c0a385dfd248edc6279fa328aaf4ea317915ab879a2ec47833230"},
+]
+
+[[package]]
 name = "typing-extensions"
 version = "4.15.0"
 description = "Backported and Experimental Type Hints for Python 3.9+"
@@ -689,4 +701,4 @@ zstd = ["backports-zstd (>=1.0.0) ; python_version < \"3.14\""]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.14"
-content-hash = "ef6b577daf8723ac6869d59a05329b5ddfeeea93afbec5f6fd8f5207913ba7d8"
+content-hash = "91f649f4cb8cc8d65b0db16811b7737d03886e6bb8fe22dc3fc451d386d33f9f"

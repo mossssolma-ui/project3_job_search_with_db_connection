@@ -1,4 +1,5 @@
 import os
+from typing import Any
 
 from dotenv import load_dotenv
 from tabulate import tabulate
@@ -31,7 +32,7 @@ def main() -> None:
         "password": os.getenv("DB_PASSWORD"),
     }
 
-    db_name = "vacan"
+    db_name = "vacancy_hunter"
 
     print("Загружаю данные с hh.ru...")
     data = get_company_vacancy(companies)
@@ -61,35 +62,35 @@ def main() -> None:
 
         user_choice = input("Введите пункт меню: ").strip()
 
-        result = []
-        hds = []
+        result: list[tuple[Any, ...]] = []
+        hds: list[str] = []
 
         if user_choice == "1":
             hds = ["company", "count"]
-            for data in db.get_companies_and_vacancies_count():
-                result.append(data)
+            for data_row in db.get_companies_and_vacancies_count():
+                result.append(data_row)
 
         elif user_choice == "2":
             hds = ["company", "vacancy", "salary", "url"]
-            for data in db.get_all_vacancies():
-                company, vacancy, salary, url = data
+            for data_row in db.get_all_vacancies():
+                company, vacancy, salary, url = data_row
                 if salary is None:
                     salary = "Не указана"
                 result.append((company, vacancy, salary, url))
 
         elif user_choice == "3":
             hds = ["avg_salary"]
-            data = db.get_avg_salary()
-            if data and data[0][0] is not None:
-                avg_salary = round(data[0][0], 2)
+            avg_salary_data = db.get_avg_salary()
+            if avg_salary_data and avg_salary_data[0][0] is not None:
+                avg_salary = round(avg_salary_data[0][0], 2)
                 result.append((f"{avg_salary} руб.",))
             else:
                 result.append(("Нет данных для расчета",))
 
         elif user_choice == "4":
             hds = ["vacancy", "salary", "url"]
-            for data in db.get_vacancies_with_higher_salary():
-                vacancy, salary, url = data
+            for data_row in db.get_vacancies_with_higher_salary():
+                vacancy, salary, url = data_row
                 if salary is None:
                     salary = "Не указана"
                 result.append((vacancy, salary, url))
@@ -98,8 +99,8 @@ def main() -> None:
             print("Введите ключевые слова через пробел: ", end=" ")
             user_keywords = input().split()
             hds = ["city", "name", "salary", "url"]
-            for data in db.get_vacancies_with_keyword(user_keywords):
-                city, name, salary, url = data
+            for data_row in db.get_vacancies_with_keyword(user_keywords):
+                city, name, salary, url = data_row
                 if salary is None:
                     salary = "Не указана"
                 result.append((city, name, salary, url))
