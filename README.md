@@ -30,11 +30,11 @@
    poetry install
 3. Настройте переменные окружения:
    ```bash
-    HOST=localhost
-    PORT=5432
-    DATABASE=postgres
-    USER=your_username
-    PASSWORD=your_password
+    DB_HOST=localhost
+    DB_PORT=5432
+    DB_DATABASE=postgres
+    DB_USER=your_username
+    DB_PASSWORD=your_password
 4. Запустите приложение:
    ```bash
    python main.py
@@ -45,9 +45,9 @@ project3_job_search_with_db_connection/
 ├── src/
 ├   └── project3_job_search_with_db_connection/
 ├       ├── __init__.py     
-├       ├── hh_api.py       # Работа с API hh.ru (AbstractAPI + HeadHunterAPI)
-├       ├── utils.py        # Вспомогательные функции (загрузка данных, работа с БД)
-├       └── db_manager.py   # Класс DBManager для анализа данных
+├       ├── hh_api.py       # Работа с API hh.ru
+├       ├── utils.py        # Вспомогательные функции 
+├       └── db_manager.py   # Класс DBManager для анализа данных (загрузка данных, работа с БД)
 ├        
 ├── main.py                 # Точка входа, интерфейс пользователя
 ├── pyproject.toml          # Зависимости и метаданные (Poetry)
