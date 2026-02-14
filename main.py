@@ -20,7 +20,7 @@ def main() -> None:
         "4412077",  # Табачная компания ПЕППЕЛЛ
         "907345",  # Лукойл
         "1057",  # Лаборатория Касперского
-        "87021",  # Wildberries
+        "87021",  # RWB (Wildberries & Russ)
         "2180",  # OZON
     ]
 
@@ -99,11 +99,12 @@ def main() -> None:
             print("Введите ключевые слова через пробел: ", end=" ")
             user_keywords = input().split()
             hds = ["city", "name", "salary", "url"]
-            for data_row in db.get_vacancies_with_keyword(user_keywords):
-                city, name, salary, url = data_row
-                if salary is None:
-                    salary = "Не указана"
-                result.append((city, name, salary, url))
+            for word in user_keywords:
+                for data_row in db.get_vacancies_with_keyword(word):
+                    city, name, salary, url = data_row
+                    if salary is None:
+                        salary = "Не указана"
+                    result.append((city, name, salary, url))
 
         elif user_choice == "0":
             print("Ну что ж, до скорой встречи :D")

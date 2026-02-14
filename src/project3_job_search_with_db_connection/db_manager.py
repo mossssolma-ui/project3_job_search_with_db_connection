@@ -1,6 +1,6 @@
 import html
 import re
-from typing import Any, Optional
+from typing import Any
 
 import psycopg2
 from psycopg2 import sql
@@ -103,8 +103,8 @@ class DBManager:
                         VALUES (%s, %s, %s, %s)
                         RETURNING company_id
                     """
-                    result = self.execute_query(
-                        company_query, (company_name, company_city, company_description, company_url), True
+                    result = self._execute_query(
+                        company_query, (company_name, company_city, company_description, company_url), fetch=True
                     )
                     if not result:
                         print(f"Компания {company_name} не сохранена")
@@ -132,7 +132,7 @@ class DBManager:
                             INSERT INTO vacancies (company_id, city, name, salary, url)
                             VALUES (%s, %s, %s, %s, %s)
                             """
-                        self.execute_query(
+                        self._execute_query(
                             vacancy_query, (company_id, vacancy_city, vacancy_name, vacancy_salary, vacancy_url)
                         )
 
@@ -140,18 +140,20 @@ class DBManager:
             self._conn.rollback()
             print(f"Произошла ошибка при заполнении таблиц: {e}")
 
-    def execute_query(self, query: str, params: Optional[tuple[Any, ...]] = None, fetch: bool = False) -> list[tuple]:
+    def _execute_query(self, query: str, params: tuple = (), fetch: bool = False) -> list[tuple]:
         """Выполнение запроса"""
         try:
             with self._conn.cursor() as cur:
                 cur.execute(query, params)
+
                 if fetch:
                     result = cur.fetchall()
-                    self._conn.commit()
-                    return result
                 else:
-                    self._conn.commit()
-                    return []
+                    result = []
+
+                self._conn.commit()
+                return result
+
         except Exception as e:
             self._conn.rollback()
             print(f"Ошибка при выполнении запроса {e}")
@@ -171,7 +173,7 @@ class DBManager:
                     ) AS v ON c.company_id = v.company_id
                     ORDER BY v.vacancy_count DESC, c.name;
                 """
-        return self.execute_query(query, fetch=True)
+        return self._execute_query(query, fetch=True)
 
     def get_all_vacancies(self) -> list[tuple]:
         """Получает список всех вакансий
@@ -187,7 +189,7 @@ class DBManager:
                     FROM vacancies AS v
                     INNER JOIN companies AS c ON c.company_id = v.company_id;
                 """
-        return self.execute_query(query, fetch=True)
+        return self._execute_query(query, fetch=True)
 
     def get_avg_salary(self) -> list[tuple]:
         """Получает среднюю зарплату по вакансиям."""
@@ -195,7 +197,7 @@ class DBManager:
                    FROM vacancies
                    WHERE salary IS NOT NULL;
                 """
-        return self.execute_query(query, fetch=True)
+        return self._execute_query(query, fetch=True)
 
     def get_vacancies_with_higher_salary(self) -> list[tuple]:
         """Получает список всех вакансий,
@@ -209,9 +211,9 @@ class DBManager:
                         )
                     ORDER BY salary DESC;
                 """
-        return self.execute_query(query, fetch=True)
+        return self._execute_query(query, fetch=True)
 
-    def get_vacancies_with_keyword(self, keyword: list[str]) -> list:
+    def get_vacancies_with_keyword(self, keyword: str) -> list:
         """
         Получает список всех вакансий,
         в названии которых содержатся
@@ -220,15 +222,11 @@ class DBManager:
         if not keyword:
             return []
 
-        placeholters = " OR ".join(["name ILIKE %s"] * len(keyword))
-
         query = """
             SELECT city, name, salary, url
             FROM vacancies
-            WHERE {}
+            WHERE name ILIKE %s
             ORDER BY name;
-        """.format(placeholters)
+        """
 
-        params = tuple(f"%{word}%" for word in keyword)
-
-        return self.execute_query(query, params, fetch=True)
+        return self._execute_query(query, (f"%{keyword}%",), fetch=True)
